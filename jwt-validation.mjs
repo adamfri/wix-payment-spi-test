@@ -9,7 +9,6 @@ const crypto = require('crypto');
 
 // Grab the app's public key. 
 // Find your app's key in the Wix Dev Center: https://dev.wix.com
-// Open your payment app and select "Webhooks" from the sidebar.
 const appKey = process.env['WIX_APP_PUBLIC_KEY']
 
 export function jwtProcessing (token, requestBody) {
@@ -19,7 +18,6 @@ export function jwtProcessing (token, requestBody) {
   // Verify the token's encryption.
   try {
     tokenBody = verifyToken(token);
-    console.log(tokenBody);
   } catch (error) {
     return error;
   }
