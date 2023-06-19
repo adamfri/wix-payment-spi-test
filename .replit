@@ -1,4 +1,4 @@
-entrypoint = "index.js"
+entrypoint = "server.mjs"
 
 hidden = [".config", "package-lock.json"]
 
