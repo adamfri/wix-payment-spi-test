@@ -2,7 +2,7 @@
   "name": "nodejs",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "server.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,6 +13,8 @@
     "@replit/database": "^2.0.2",
     "@types/node": "^18.0.6",
     "express": "^4.18.2",
-    "node-fetch": "^3.2.6"
+    "jsonwebtoken": "^9.0.0",
+    "node-fetch": "^3.2.6",
+    "uuid": "^9.0.0"
   }
 }
