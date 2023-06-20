@@ -40,10 +40,10 @@ function verifyToken (token) {
   }
 }
 
-// This function decodes the data from a token and compares it
-// to a request body.
+// This function encodes the request body using SHA256 and
+// compares to token's "data" claim.
 function verifyMessageBody (tokenBody, requestBody){
-  // Decode
+  // Encode
   const hash = crypto.createHash('sha256').update(requestBody).digest('hex');
   // Compare
   if(hash === tokenBody.data.SHA256){
