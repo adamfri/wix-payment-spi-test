@@ -1,3 +1,10 @@
+/****************************************************** 
+ *                  JWT Validation                    *
+ * This file includes code to validate the JSON web   *
+ * tokens that are included with requests sent to the * 
+ * server from Wix.                                   *
+ ******************************************************/
+
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 // Import the jsonwebtoken NPM package. 

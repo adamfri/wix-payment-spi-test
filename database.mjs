@@ -1,3 +1,11 @@
+/****************************************************** 
+ *                    Database                        *
+ * This file includes code that implements basic      *
+ * databased functionality for the Connect Acount,    *
+ * Create Transaction, and Refund Transaction         *
+ * endpoints.                                         *
+ ******************************************************/
+
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const Client = require("@replit/database");
@@ -17,7 +25,9 @@ DB schema:
 }
 */
 export async function createAccount (accountDetails) {
-  console.log(accountDetails)
+  // Validate account data. In this example, the currency
+  // and account details are validated.
+  
   // Check that currency is EUR
   if(accountDetails.currency != "EUR"){
     throw new Error("CURRENCY_NOT_SUPPORTED")
@@ -28,7 +38,7 @@ export async function createAccount (accountDetails) {
   }
 
   const merchants = await client.get("merchants");
-  // If the merchant doesn't exist yet, create it.
+  // If the merchant doesn't exist yet, create a new one.
   if(!merchants.hasOwnProperty(accountDetails.credentials.setupId)){
     const newMerchant = {
       "accountId" : uuidv4(),
@@ -37,37 +47,13 @@ export async function createAccount (accountDetails) {
     }
     merchants[accountDetails.credentials.setupId] = newMerchant
     await client.set("merchants", merchants);
-    console.log(await client.get('merchants'))
     return newMerchant;
   // If the merchant already exists, return the details.
   } else {
-    console.log(await client.get('merchants'))
     return merchants[accountDetails.credentials.setupId]
   }
   
 }
-/* Connect account testing stuff
-const testAccount = {
-  "credentials": {
-    "setupId": "123",
-    "email": "steve@steve.com"
-  },
-  "country": "US",
-  "currency": "USD",
-  "mode": "live",
-  "wixMerchantId": "000000-0000-0000-0000-000000000000"
-}
-
-
-client.set('merchants', {
-  "Initializer": {
-    "accountId" : "123456",
-    "accountName" : "test@test.com"
-  }
-})
-
-console.log(await accountSetup(testAccount))
-*/
 
 /** ******************************************* */
 // Support for the Create Transaction endpoint //
@@ -84,6 +70,9 @@ DB schema:
 }
 */
 export async function processWixTransaction (transactionDetails) {
+  // Validate transaction data. In this example, the currency,
+  // payment method, and merchant ID are validated.
+  
   // Validate currency
   if(transactionDetails.order.description.currency != "EUR"){
     throw new Error("CURRENCY_NOT_SUPPORTED")
@@ -110,12 +99,12 @@ export async function processWixTransaction (transactionDetails) {
   const transactions = await client.get('transactions')
   // Check if the transaction already exists
   if (transactions.hasOwnProperty(transactionDetails.wixTransactionId)) {
-    console.log('transaction not added', transactions)
     return transactions[transactionDetails.wixTransactionId] 
   
   // If the transaction is new, create it.
   } else {
-    //Simulating payment results
+    // This code chooses a transaction result randomly. Implement
+    // your own payment processing here.
     const results = ["APPROVED", "DECLINED", "PENDING"]
     const result = results[Math.floor(Math.random() * results.length)]
 
@@ -124,7 +113,8 @@ export async function processWixTransaction (transactionDetails) {
       internalTransactionId : uuidv4(),
       amount : transactionDetails.order.description.totalAmount,
       currency : transactionDetails.order.description.currency,
-      status : result,
+      status: result,
+      //status : result,
       wixMerchantId : transactionDetails.wixMerchantId
     }
     transactions[transactionDetails.wixTransactionId] = newTransaction;
@@ -132,18 +122,38 @@ export async function processWixTransaction (transactionDetails) {
     return newTransaction;
   } 
 }
-/* Transaction testing stuff
-const testTransaction = {
-  wixTransactionId : "123123124sdfaw4erd35rf3dqw",
-  paymentMethod : "creditCard",
-  wixMerchantId : "000000-0000-0000-0000-000000000000",
-  order : {
-    description: {
-      totalAmount : 10000,
-      currency : "EUR",
-      
-    }
+
+/** ******************************************* */
+// Support for the Refund Transaction endpoint //
+/** ***************************************** */
+
+// There is no separate DB object for refunds. 
+// Instead, this function adds `refundId` and 
+// `refundedAmount` fields to an existing transaction
+// object.
+
+export async function processWixRefund (refundDetails) {
+  // Fetch the transactions object
+  const transactions = await client.get('transactions');
+
+  // Validate that the transaction exists
+  if(transactions[refundDetails.wixTransactionId] === undefined) {
+    throw new Error("TRANSACTION_NOT_FOUND")
   }
+
+  // Save the refunded amount and create a refund ID if needed.
+  let refundTransaction = transactions[refundDetails.wixTransactionId]
+  
+  if(refundTransaction.refundedAmount === undefined){refundTransaction.refundedAmount = 0}
+  refundTransaction.refundedAmount += refundDetails.refundAmount;
+
+  if(refundTransaction.refundId === undefined) {
+    refundTransaction.refundId = uuidv4()
+  }
+
+  transactions[refundDetails.wixTransactionId] = refundTransaction;
+  await client.set('transactions', transactions)
+
+  // Return the internal refund ID for the response to Wix.
+  return refundTransaction.refundId;
 }
-processWixTransaction(testTransaction);
-*/
