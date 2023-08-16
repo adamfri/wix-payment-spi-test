@@ -1,7 +1,7 @@
 /****************************************************** 
  *                    Database                        *
  * This file includes code that implements basic      *
- * databased functionality for the Connect Acount,    *
+ * database functionality for the Connect Account,    *
  * Create Transaction, and Refund Transaction         *
  * endpoints.                                         *
  ******************************************************/
